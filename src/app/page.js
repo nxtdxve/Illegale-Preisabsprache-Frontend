@@ -1,13 +1,13 @@
 "use client";
-import Image from "next/image";
 import styles from "./page.module.css";
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 
-const prod = () => {
+const App = () => {
   const [products, setProducts] = useState([]);
   useEffect(() =>{
-    fetch('https://baumarkt-backend-1e27ff4f12df.herokuapp.com/products')
+    fetch('https://baumarkt-backend-1e27ff4f12df.herokuapp.com/products', { cache: 'force-cache'})
     .then((response) => response.json())
     .then((data) => {
       console.log(data);
@@ -20,7 +20,7 @@ const prod = () => {
 
   const [retailers, setRetailers] = useState([]);
   useEffect(() =>{
-    fetch('https://baumarkt-backend-1e27ff4f12df.herokuapp.com/retailers')
+    fetch('https://baumarkt-backend-1e27ff4f12df.herokuapp.com/retailers', { cache: 'force-cache'})
     .then((response) => response.json())
     .then((data) => {
       console.log(data);
@@ -31,23 +31,31 @@ const prod = () => {
     });
   }, []);
 
-return (
 
-  <div className="product-container">
+return (
+  <div className={styles.product_container}>
+    <h1 className={styles.title}>illegale Preisabsprache</h1>
     {products.map((product) => {
       return (
-        <div>
-          <p className="product-name">{product.name}</p>
+        <div className={styles.product_name}>
+          <p>{product.name}</p>
           {retailers.map((retailer) => {
-          <p className="product-price-hornbach">{retailer.name}: CHF {product.price_details.price_records.price}</p>
-          })}
+            var current_price
+            product.price_details.price_records.map( (retailer_price)  => {
+              if (retailer_price.retailer_id == retailer._id.$oid) {
+                current_price = retailer_price.price
+              }
+            })
+            return (
+            <p className={styles.product_price}>{retailer.name}: CHF {current_price}</p>
+    )})}    
+          <Link href={`./product_detail/${product._id}`} replace>Info</Link>
         </div>
       );
-
     })}
   </div>
 )
 
 };
 
-export default prod;
+export default App;
